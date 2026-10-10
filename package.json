@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "description": "complete backend architecture.",
   "main": "index.js",
+  "type":"module",
   "scripts": {
-    "dev": "nodemon src/server.js",
+    "dev": "node --watch src/server.js",
     "start": "node src/server.js"
   },
   "repository": {
@@ -14,7 +15,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "bugs": {
     "url": "https://github.com/gyanendra2025/ecommerce-backend/issues"
   },
@@ -28,6 +28,5 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
   }
 }
