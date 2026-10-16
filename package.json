@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "description": "complete backend architecture.",
   "main": "index.js",
-  "type":"module",
+  "type": "module",
   "scripts": {
     "dev": "node --watch src/server.js",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "migrate": "prisma migrate dev"
   },
   "repository": {
     "type": "git",
@@ -20,6 +21,9 @@
   },
   "homepage": "https://github.com/gyanendra2025/ecommerce-backend#readme",
   "dependencies": {
+    "@prisma/adapter-pg": "^7.10.1",
+    "@prisma/client": "^7.10.1",
+    "bcryptjs": "^3.0.3",
     "dotenv": "^18.0.6",
     "express": "^5.2.1",
     "helmet": "^8.3.0",
@@ -28,5 +32,6 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "prisma": "^7.10.1"
   }
 }

@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:18
+    container_name: ecommerce-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ecommerce_backend
+      POSTGRES_USER: ecommerce_app_backend
+      POSTGRES_PASSWORD: ecommerce_password_backend
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+
+volumes:
+  postgres_data:
