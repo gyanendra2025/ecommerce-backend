@@ -4,6 +4,7 @@ import PinoHttp from "pino-http";
 import healthRouter from "./routes/health.routes.js";
 import authRouter from "./modules/auth/auth.routes.js";
 import userRouter from "./modules/users/user.routes.js";
+import addressRouter from "./modules/addresses/address.routes.js";
 
 const app = express();
 app.use(helmet());
@@ -14,6 +15,7 @@ app.use("/health", healthRouter);
 
 app.use("/auth", authRouter);
 app.use("/user", userRouter);
+app.use("/address", addressRouter);
 
 app.use((req, res) => {
   res.status(404).json({
