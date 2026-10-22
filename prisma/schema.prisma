@@ -52,6 +52,7 @@ model Product {
   updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
   inventory Inventory?
+   cartItems CartItem[]
 
   @@map("products")
 }
@@ -66,4 +67,30 @@ model Inventory {
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@map("inventory")
+}
+
+model Cart {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @unique @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  items CartItem[]
+
+  @@map("carts")
+}
+
+model CartItem {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cartId    String   @map("cart_id") @db.Uuid
+  productId String   @map("product_id") @db.Uuid
+  quantity  Int
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, productId])
+  @@map("cart_items")
 }
