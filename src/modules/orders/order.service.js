@@ -62,7 +62,10 @@ export const createOrder = async (userId, addressId) => {
           productId: item.productId,
           availableQuantity: { gte: item.quantity },
         },
-        data: { availableQuantity: { decrement: item.quantity } },
+        data: {
+          availableQuantity: { decrement: item.quantity },
+          reservedQuantity: { increment: item.quantity },
+        },
       });
 
       if (result.count === 0) {

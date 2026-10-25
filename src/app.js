@@ -8,6 +8,7 @@ import addressRouter from "./modules/addresses/address.routes.js";
 import productRouter from "./modules/product/product.routes.js";
 import cartRouter from "./modules/cart/cart.routes.js";
 import orderRouter from "./modules/orders/order.routes.js";
+import paymentRouter from "./modules/payments/payment.routes.js";
 
 const app = express();
 app.use(helmet());
@@ -22,6 +23,7 @@ app.use("/address", addressRouter);
 app.use("/products", productRouter);
 app.use("/cart", cartRouter);
 app.use("/order", orderRouter);
+app.use("/payments", paymentRouter);
 
 app.use((req, res) => {
   res.status(404).json({
