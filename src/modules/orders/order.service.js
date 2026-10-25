@@ -57,10 +57,17 @@ export const createOrder = async (userId, addressId) => {
     });
 
     for (const item of cart.items) {
-      await tx.inventory.update({
-        where: { productId: item.productId },
+      const result = await tx.inventory.updateMany({
+        where: {
+          productId: item.productId,
+          availableQuantity: { gte: item.quantity },
+        },
         data: { availableQuantity: { decrement: item.quantity } },
       });
+
+      if (result.count === 0) {
+        throw new AppError(409, `Insufficient stock for ${item.product.name}`);
+      }
     }
 
     await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
