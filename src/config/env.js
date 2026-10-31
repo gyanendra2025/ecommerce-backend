@@ -1,11 +1,12 @@
-import "dotenv/config"
+import "dotenv/config";
 
- const env={
-    port:Number(process.env.PORT)|| 3000,
-    nodeEnv:process.env.NODE_ENV || "development",
-     databaseUrl: process.env.DATABASE_URL,
-     jwtSecret: process.env.JWT_SECRET,
-jwtExpiresIn: process.env.JWT_EXPIRES_IN || "1h",
+const env = {
+  port: Number(process.env.PORT) || 3000,
+  nodeEnv: process.env.NODE_ENV || "development",
+  databaseUrl: process.env.DATABASE_URL,
+  jwtSecret: process.env.JWT_SECRET,
+  jwtExpiresIn: process.env.JWT_EXPIRES_IN || "1h",
+  redisUrl: process.env.REDIS_URL,
 };
 
 export default env;

@@ -1,6 +1,10 @@
 import prisma from "../../config/prisma.js";
 import AppError from "../../utils/AppError.js";
 
+import redis from "../../config/redis.js";
+
+const PRODUCT_CACHE_TTL = 60; // seconds
+
 const SORTABLE_FIELDS = ["price", "name", "createdAt"];
 
 export const createProduct = async ({
@@ -44,6 +48,7 @@ export const updateProduct = async (productId, data) => {
   if (result.count === 0) {
     throw new AppError(404, "Product not found");
   }
+  await redis.del(`product:${productId}`);
   return prisma.product.findUnique({
     where: { id: productId },
     include: { inventory: true },
@@ -58,14 +63,32 @@ export const setInventory = async (productId, { availableQuantity }) => {
   if (result.count === 0) {
     throw new AppError(404, "Product not found");
   }
+  await redis.del(`product:${productId}`);
   return prisma.inventory.findUnique({ where: { productId } });
 };
 
 export const getProduct = async (productId, isAdmin) => {
-  const product = await prisma.product.findUnique({
-    where: { id: productId },
-    include: { inventory: true },
-  });
+  const cacheKey = `product:${productId}`;
+  const cached = await redis.get(cacheKey);
+
+  let product;
+  if (cached) {
+    product = JSON.parse(cached);
+  } else {
+    product = await prisma.product.findUnique({
+      where: { id: productId },
+      include: { inventory: true },
+    });
+    if (product) {
+      await redis.set(
+        cacheKey,
+        JSON.stringify(product),
+        "EX",
+        PRODUCT_CACHE_TTL,
+      );
+    }
+  }
+
   if (!product || (!isAdmin && !product.isActive)) {
     throw new AppError(404, "Product not found");
   }
