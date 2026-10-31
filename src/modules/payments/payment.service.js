@@ -2,6 +2,7 @@ import prisma from "../../config/prisma.js";
 import AppError from "../../utils/AppError.js";
 import { canTransition } from "../orders/order.statemachine.js";
 import { charge } from "./fakePaymentGateway.js";
+import { enqueue } from "../../jobs/queue.js";
 
 export const payOrder = async (userId, orderId, idempotencyKey) => {
   const existingPayment = await prisma.payment.findUnique({
@@ -82,6 +83,10 @@ export const payOrder = async (userId, orderId, idempotencyKey) => {
         }),
       ),
     ]);
+    await enqueue("send_order_email", { orderId });
+    await enqueue("send_payment_confirmation", { orderId });
+    await enqueue("generate_invoice", { orderId });
+    await enqueue("update_analytics", { orderId });
     return updatedPayment;
   }
 

@@ -171,4 +171,32 @@ model Payment {
   @@map("payments")
 }
 
+enum JobType {
+  send_order_email
+  send_payment_confirmation
+  generate_invoice
+  update_analytics
+}
 
+enum JobStatus {
+  pending
+  processing
+  completed
+  dead
+}
+
+model Job {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  type        JobType
+  payload     Json
+  status      JobStatus @default(pending)
+  attempts    Int       @default(0)
+  maxAttempts Int       @default(5) @map("max_attempts")
+  nextRunAt   DateTime  @default(now()) @map("next_run_at") @db.Timestamptz
+  lastError   String?   @map("last_error")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([status, nextRunAt])
+  @@map("jobs")
+}
