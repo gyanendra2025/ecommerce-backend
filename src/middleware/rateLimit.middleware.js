@@ -12,9 +12,15 @@ const rateLimit = ({
   return async (req, res, next) => {
     const key = `ratelimit:${keyPrefix}:${keyGenerator(req)}`;
 
-    const count = await redis.incr(key);
-    if (count === 1) {
-      await redis.expire(key, windowSeconds);
+    let count;
+    try {
+      count = await redis.incr(key);
+      if (count === 1) {
+        await redis.expire(key, windowSeconds);
+      }
+    } catch (error) {
+      console.error("Rate limiter Redis error, failing open:", error.message);
+      return next();
     }
 
     if (count > max) {

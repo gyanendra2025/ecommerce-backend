@@ -35,3 +35,7 @@ export const emitOrderUpdate = (userId, order) => {
     status: order.status,
   });
 };
+
+export const closeSocket = () => {
+  if (io) io.close();
+};

@@ -48,7 +48,11 @@ export const updateProduct = async (productId, data) => {
   if (result.count === 0) {
     throw new AppError(404, "Product not found");
   }
-  await redis.del(`product:${productId}`);
+  try {
+    await redis.del(`product:${productId}`);
+  } catch (error) {
+    console.error("Redis invalidation failed:", error.message);
+  }
   return prisma.product.findUnique({
     where: { id: productId },
     include: { inventory: true },
@@ -63,13 +67,22 @@ export const setInventory = async (productId, { availableQuantity }) => {
   if (result.count === 0) {
     throw new AppError(404, "Product not found");
   }
-  await redis.del(`product:${productId}`);
+  try {
+    await redis.del(`product:${productId}`);
+  } catch (error) {
+    console.error("Redis invalidation failed:", error.message);
+  }
   return prisma.inventory.findUnique({ where: { productId } });
 };
 
 export const getProduct = async (productId, isAdmin) => {
   const cacheKey = `product:${productId}`;
-  const cached = await redis.get(cacheKey);
+  let cached = null;
+  try {
+    cached = await redis.get(cacheKey);
+  } catch (error) {
+    console.error("Redis read failed, falling back to DB:", error.message);
+  }
 
   let product;
   if (cached) {
@@ -79,13 +92,21 @@ export const getProduct = async (productId, isAdmin) => {
       where: { id: productId },
       include: { inventory: true },
     });
+
     if (product) {
-      await redis.set(
-        cacheKey,
-        JSON.stringify(product),
-        "EX",
-        PRODUCT_CACHE_TTL,
-      );
+      try {
+        await redis.set(
+          cacheKey,
+          JSON.stringify(product),
+          "EX",
+          PRODUCT_CACHE_TTL,
+        );
+      } catch (error) {
+        console.error(
+          "Redis write failed, continuing without cache:",
+          error.message,
+        );
+      }
     }
   }
 
