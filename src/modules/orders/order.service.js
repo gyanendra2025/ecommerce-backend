@@ -1,6 +1,7 @@
 import prisma from "../../config/prisma.js";
 import AppError from "../../utils/AppError.js";
 import { canTransition } from "./order.statemachine.js";
+import { emitOrderUpdate } from "../../websocket/socket.js";
 
 export const createOrder = async (userId, addressId) => {
   const address = await prisma.address.findFirst({
@@ -94,11 +95,15 @@ export const updateOrderStatus = async (orderId, newStatus) => {
     );
   }
 
-  return prisma.order.update({
+  const updatedOrder = await prisma.order.update({
     where: { id: orderId },
     data: { status: newStatus },
   });
+
+  emitOrderUpdate(updatedOrder.userId, updatedOrder);
+  return updatedOrder;
 };
+
 export const getOrder = async (userId, orderId, isAdmin) => {
   const order = await prisma.order.findUnique({
     where: { id: orderId },
